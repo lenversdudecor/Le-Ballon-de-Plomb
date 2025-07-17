@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Debug - Le Ballon de Plomb™</title>
+</head>
+<body>
+  <h2>🧪 Debug Tool – Le Ballon de Plomb™</h2>
+
+  <label>Room Code : <input type="text" id="roomCode" value="TEST1" /></label><br><br>
+  <label>Pseudo joueur : <input type="text" id="pseudo" value="TestUser1" /></label>
+  <label>Pays : <input type="text" id="country" value="🇲🇺" /></label>
+  <button id="addPlayer">➕ Ajouter joueur</button><br><br>
+
+  <button id="assignRoles">🎭 Assigner les rôles</button>
+  <button id="lancerTour">🧠 Lancer un tour</button>
+  <button id="fin">🎬 Afficher résultat final</button>
+
+  <div id="log" style="margin-top: 20px; padding: 10px; border: 1px solid #ccc;"></div>
+
+  <script type="module">
+    import { db, ref, set } from "./js/firebase.js";
+    import { assignRoles, lancerTour, afficherResultatFinal } from "./js/gameEngine.js";
+
+    const roomCodeInput = document.getElementById("roomCode");
+    const pseudoInput = document.getElementById("pseudo");
+    const countryInput = document.getElementById("country");
+    const log = document.getElementById("log");
+
+    function logMsg(msg) {
+      log.innerHTML += `<div>✔️ ${msg}</div>`;
+    }
+
+    document.getElementById("addPlayer").onclick = () => {
+      const room = roomCodeInput.value.trim();
+      const pseudo = pseudoInput.value.trim();
+      const country = countryInput.value.trim();
+      if (!room || !pseudo || !country) return alert("Champs manquants");
+
+      const playerRef = ref(db, `rooms/${room}/players/${pseudo}`);
+      set(playerRef, {
+        pseudo,
+        country,
+        timestamp: Date.now()
+      }).then(() => logMsg(`Joueur ${pseudo} ajouté à la room ${room}`));
+    };
+
+    document.getElementById("assignRoles").onclick = () => {
+      const room = roomCodeInput.value.trim();
+      const playersRef = ref(db, `rooms/${room}/players`);
+      import("https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js").then(({ getDatabase, onValue }) => {
+        onValue(playersRef, (snapshot) => {
+          const joueurs = snapshot.val() || {};
+          assignRoles(room, joueurs);
+          logMsg("Rôles assignés !");
+        }, { onlyOnce: true });
+      });
+    };
+
+    document.getElementById("lancerTour").onclick = () => {
+      const room = roomCodeInput.value.trim();
+      lancerTour(room);
+      logMsg("Tour lancé !");
+    };
+
+    document.getElementById("fin").onclick = () => {
+      const room = roomCodeInput.value.trim();
+      afficherResultatFinal(room);
+    };
+  </script>
+</body>
+</html>
