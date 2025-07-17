@@ -196,7 +196,7 @@ function listenToPrivateChat() {
 }
 
 // 📘 Règles
-const rulesBtn = document.getElementById("rulesBtn");
+
 const rulesModal = document.getElementById("rulesModal");
 const closeRulesBtn = document.getElementById("closeRulesBtn");
 
