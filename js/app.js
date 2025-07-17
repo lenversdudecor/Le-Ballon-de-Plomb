@@ -1,4 +1,5 @@
 // js/app.js
+document.addEventListener("DOMContentLoaded", () => {
 import { db, ref, set, push, onValue, update } from "./firebase.js";
 import { assignRoles, lancerTourAuto, afficherResultatFinal } from "./gameEngine.js";
 import { allCountries } from "./allCountries.js";
@@ -234,3 +235,4 @@ function renderVoteOptions() {
     voteOptions.appendChild(btn);
   });
 }
+});
