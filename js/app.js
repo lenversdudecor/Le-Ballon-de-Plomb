@@ -24,7 +24,6 @@ const voteOptions = document.getElementById("voteOptions");
 const rulesBtn = document.getElementById("rulesBtn");
 const rulesModal = document.getElementById("rulesModal");
 const closeRulesBtn = document.getElementById("closeRulesBtn");
-
 const privateChatArea = document.getElementById("privateChatArea");
 const privateChatMessages = document.getElementById("privateChatMessages");
 const privateChatInput = document.getElementById("privateChatInput");
