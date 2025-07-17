@@ -1,6 +1,5 @@
 // js/allCountries.js
-
-const allCountries = [
+export const allCountries = [
   { name: "Afghanistan", emoji: "🇦🇫" },
   { name: "Afrique du Sud", emoji: "🇿🇦" },
   { name: "Albanie", emoji: "🇦🇱" },
