@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Test Firebase</title>
+</head>
+<body>
+  <h2>✅ Test rapide Firebase</h2>
+  <input type="text" id="pseudoInput" placeholder="Ton pseudo" />
+  <button id="testBtn">Créer room de test</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+    // 🛠️ Ta config Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBDxkMi1JwAKhR0VaA0cqXb3mLeHc-XZcw",
+      authDomain: "le-ballon-de-plomb.firebaseapp.com",
+      databaseURL: "https://le-ballon-de-plomb-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "le-ballon-de-plomb",
+      storageBucket: "le-ballon-de-plomb.appspot.com",
+      messagingSenderId: "382972822900",
+      appId: "1:382972822900:web:79a25d551ef32c13c71821",
+      measurementId: "G-NF3LESNKFE",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // 🔘 Test d’écriture
+    const btn = document.getElementById("testBtn");
+    btn.onclick = () => {
+      const pseudo = document.getElementById("pseudoInput").value.trim();
+      if (!pseudo) return alert("Entre un pseudo");
+
+      const playerRef = ref(db, `rooms/TEST123/players/${pseudo}`);
+      set(playerRef, {
+        pseudo,
+        timestamp: Date.now()
+      })
+        .then(() => {
+          alert("✅ Écriture réussie dans Firebase !");
+          console.log("Écriture Firebase réussie");
+        })
+        .catch((err) => {
+          alert("❌ Problème Firebase");
+          console.error(err);
+        });
+    };
+  </script>
+</body>
+</html>
