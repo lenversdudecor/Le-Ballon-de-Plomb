@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Le Ballon de Plomb™</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <img src="assets/RHulxXLylPpri6CILn8I--0--sleqd.jpg" alt="Le Ballon de Plomb" style="height: 60px;" />
+      <button id="rulesBtn">📘 Règles</button>
+    </header>
+
+    <main>
+      <!-- Écran d'inscription -->
+      <section id="register-screen" class="screen active">
+        <h2>🎮 Rejoins une partie</h2>
+        <input type="text" id="pseudoInput" placeholder="Ton pseudo" />
+        <div class="form-group">
+          <label for="countrySearch">Choisis ton pays :</label>
+          <input type="text" id="countrySearch" placeholder="Recherche ton pays..." autocomplete="off" />
+          <ul id="countryList" class="country-list"></ul>
+          <input type="hidden" id="countrySelect" />
+          <div id="selectedCountryPreview" class="selected-country"></div>
+        </div>
+        <button id="createRoomBtn">Créer une partie</button>
+        <input type="text" id="roomCodeInput" placeholder="Code de la room" />
+        <button id="joinRoomBtn">Rejoindre</button>
+      </section>
+
+      <!-- Écran de jeu -->
+      <section id="game-screen" class="screen hidden">
+        <h2>🎯 Partie : <span id="roomCodeDisplay"></span></h2>
+        <div id="playerList"></div>
+        <div id="gameStatus"></div>
+
+        <!-- Zone de vote -->
+        <div id="voteArea" class="hidden">
+          <h3>🗳️ Votez pour un joueur :</h3>
+          <div id="voteOptions"></div>
+        </div>
+
+        <!-- Chat global -->
+        <div id="chatArea">
+          <div id="chatMessages"></div>
+          <input type="text" id="chatInput" placeholder="Message..." />
+          <button id="sendMsgBtn">Envoyer</button>
+        </div>
+
+        <!-- Chat privé pour journalistes -->
+        <div id="privateChatArea" class="hidden">
+          <h4>🔒 Chat secret (journalistes)</h4>
+          <div id="privateChatMessages"></div>
+          <input type="text" id="privateChatInput" placeholder="Message secret..." />
+          <button id="sendPrivateMsgBtn">Envoyer au clan</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modal Règles -->
+    <div id="rulesModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>📘 Règles du jeu – Le Ballon de Plomb™</h3>
+        <p>
+          Deux camps s’affrontent secrètement :<br>
+          🎤 Les Journalistes veulent faire élire un faux Ballon d’Or.<br>
+          💚 Les Supporters doivent élire le vrai Ballon d’Or (désigné par le système).<br><br>
+          Chaque tour, discutez, votez, et observez les indices… Mais attention aux manipulations !
+        </p>
+        <button id="closeRulesBtn">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="js/firebase.js"></script>
+  <script type="module" src="js/gameEngine.js"></script>
+  <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/allCountries.js"></script>
+</body>
+</html>
