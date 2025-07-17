@@ -196,8 +196,13 @@ function listenToPrivateChat() {
 }
 
 // 📘 Règles
+const rulesBtn = document.getElementById("rulesBtn");
+const rulesModal = document.getElementById("rulesModal");
+const closeRulesBtn = document.getElementById("closeRulesBtn");
+
 rulesBtn.onclick = () => rulesModal.classList.remove("hidden");
 closeRulesBtn.onclick = () => rulesModal.classList.add("hidden");
+
 
 // 🔁 Suivre les tours en cours
 const tourRef = ref(db, `rooms/${roomCode}/tour`);
