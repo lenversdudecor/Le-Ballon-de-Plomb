@@ -1,9 +1,9 @@
 // js/app.js
-document.addEventListener("DOMContentLoaded", () => {
+
 import { db, ref, set, push, onValue, update } from "./firebase.js";
 import { assignRoles, lancerTourAuto, afficherResultatFinal } from "./gameEngine.js";
 import { allCountries } from "./allCountries.js";
-
+document.addEventListener("DOMContentLoaded", () => {
 // Références DOM
 const registerScreen = document.getElementById("register-screen");
 const gameScreen = document.getElementById("game-screen");
