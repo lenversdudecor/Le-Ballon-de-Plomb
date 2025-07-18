@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const voteOptions = document.getElementById("voteOptions");
   const resultPanel = document.getElementById("resultPanel");
   const resetGameBtn = document.getElementById("resetGameBtn");
-  const rulesBtn = document.getElementById("rulesBtn");
+  const relancerBtn = document.getElementById("relancerBtn") || document.getElementById("resetGameBtn");
   const rulesModal = document.getElementById("rulesModal");
   const closeRulesBtn = document.getElementById("closeRulesBtn");
 
