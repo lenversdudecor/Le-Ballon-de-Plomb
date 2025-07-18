@@ -47,8 +47,6 @@ const TEMPS_PAR_TOUR = 60; // secondes
   "Un joueur a modifié complètement son comportement depuis le premier tour..."
 ];
 
-];
-
 // --- ÉTAT LOCAL ---
 let currentTour = 1;
 let timer = null;
