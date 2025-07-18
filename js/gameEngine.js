@@ -4,7 +4,7 @@ import { db, ref, set, onValue, remove } from "./firebase.js";
 // --- CONFIGURATION ---
 const TOURS_TOTAL = 5;
 const TEMPS_PAR_TOUR = 60; // secondes
-const INDICES = [
+ const INDICES = [
   "Le joueur #2 aime la presse écrite...",
   "Le joueur #4 suit beaucoup les conférences...",
   "Le joueur #7 a voté très tôt au dernier tour...",
@@ -14,7 +14,39 @@ const INDICES = [
   "Un joueur a changé son vote à chaque tour...",
   "Les journalistes semblent voter groupés...",
   "Un supporter a défendu le mauvais joueur...",
-  "Quelqu’un essaie de manipuler la discussion..."
+  "Quelqu’un essaie de manipuler la discussion...",
+  "Un joueur a utilisé beaucoup d'émojis dans ses messages...",
+  "Le joueur #1 semble très sûr de lui...",
+  "Un journaliste tente de détourner le débat...",
+  "Le joueur #3 a été silencieux pendant tout le tour...",
+  "Le joueur avec le drapeau 🇫🇷 a été très actif...",
+  "Quelqu’un copie souvent les arguments des autres...",
+  "Le joueur #6 a changé de ton brusquement...",
+  "Certains messages semblent trop bien construits pour être honnêtes...",
+  "Un joueur utilise toujours les mêmes expressions...",
+  "Le pseudo le plus long cache peut-être un manipulateur...",
+  "Un joueur pose beaucoup de questions mais ne vote jamais clair...",
+  "Le joueur qui a démarré la conversation pourrait avoir un rôle important...",
+  "Un joueur essaie de désigner un coupable trop tôt...",
+  "Un joueur utilise souvent le mot 'objectivement'...",
+  "Le joueur #5 réagit toujours aux votes, jamais avant...",
+  "Le joueur #2 a pris la défense d’un journaliste sans raison claire...",
+  "Les votes du dernier tour étaient étrangement alignés...",
+  "Un joueur essaie de créer une confusion volontaire...",
+  "Un joueur utilise des majuscules de façon excessive...",
+  "Le joueur #4 change souvent de sujet...",
+  "Le joueur #3 ne s’est jamais exprimé sur l’objectif du tour...",
+  "Certains joueurs parlent beaucoup pour dire peu...",
+  "Le pseudo en majuscules attire les soupçons...",
+  "Un joueur semble recopier les idées d’un autre à chaque tour...",
+  "Le joueur #6 suit la majorité, mais ne prend jamais d’initiative...",
+  "Un joueur a voté pour un candidat très peu cité...",
+  "Le joueur #7 a toujours voté dans les premières secondes...",
+  "Le drapeau choisi par un joueur semble peu cohérent avec son pseudo...",
+  "Le joueur le plus bavard n’est pas forcément celui qui dit la vérité...",
+  "Un joueur a modifié complètement son comportement depuis le premier tour..."
+];
+
 ];
 
 // --- ÉTAT LOCAL ---
