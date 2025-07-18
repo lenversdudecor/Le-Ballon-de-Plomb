@@ -14,7 +14,7 @@ import {
 const firebaseConfig = {
   apiKey: "AIzaSyBDxkMi1JwAKhR0VaA0cqXb3mLeHc-XZcw",
   authDomain: "le-ballon-de-plomb.firebaseapp.com",
-  databaseURL: "https://le-ballon-de-plomb-default-rtdb.firebaseio.com", // ✅ CORRIGÉ ICI
+  databaseURL: "https://le-ballon-de-plomb-default-rtdb.europe-west1.firebasedatabase.app", // ✅ CORRIGÉ ICI
   projectId: "le-ballon-de-plomb",
   storageBucket: "le-ballon-de-plomb.appspot.com",
   messagingSenderId: "382972822900",
