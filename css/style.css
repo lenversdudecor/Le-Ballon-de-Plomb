@@ -29,6 +29,7 @@ header {
 
 header img {
   height: 60px;
+  cursor: pointer;
 }
 
 /* BUTTONS */
@@ -168,11 +169,6 @@ h2, h3, h4 {
   display: none;
 }
 
-/* HIDDEN CLASS */
-.hidden {
-  display: none !important;
-}
-
 /* DEBUG BUTTON */
 #debugAccessBtn {
   position: fixed;
@@ -189,20 +185,53 @@ h2, h3, h4 {
 
 /* RESULT PANEL */
 #resultPanel {
-  background: #fff0f6;
-  border: 2px dashed #d63384;
-  border-radius: 12px;
+  background: #ffffff;
   padding: 20px;
-  margin-top: 20px;
-  animation: fadeIn 0.5s ease-in-out;
+  border: 2px solid #444;
+  border-radius: 12px;
+  margin-top: 30px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.2);
+  line-height: 1.6;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+#resultPanel h3 {
+  font-size: 1.4em;
+  margin-bottom: 10px;
 }
 
-/* MOBILE */
+#resultPanel ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+#resultPanel li {
+  margin: 5px 0;
+}
+
+/* RELANCER BOUTON */
+#resetGameBtn {
+  background: #28a745;
+}
+
+#resetGameBtn:hover {
+  background: #218838;
+}
+
+/* SPECTATEUR */
+#spectatorBtn {
+  background: #6c757d;
+}
+
+#spectatorBtn:hover {
+  background: #5a6268;
+}
+
+/* HIDDEN CLASS */
+.hidden {
+  display: none !important;
+}
+
+/* RESPONSIVE MOBILE */
 @media screen and (max-width: 600px) {
   button {
     width: 100%;
