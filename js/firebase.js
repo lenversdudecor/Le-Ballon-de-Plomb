@@ -35,3 +35,5 @@ export {
   update
 };
 
+// Exporter tout ce dont on a besoin
+export { db, ref, set, push, onValue, update, remove };
