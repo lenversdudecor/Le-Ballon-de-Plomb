@@ -3,7 +3,7 @@ import { db, ref, set, onValue, remove } from "./firebase.js";
 
 // --- CONFIGURATION ---
 const TOURS_TOTAL = 5;
-const TEMPS_PAR_TOUR = 60; // secondes
+const TEMPS_PAR_TOUR = 240; // secondes
  const INDICES = [
   "Le joueur #2 aime la presse écrite...",
   "Le joueur #4 suit beaucoup les conférences...",
