@@ -18,6 +18,7 @@
       <section id="register-screen" class="screen active">
         <h2>🎮 Rejoins une partie</h2>
         <input type="text" id="pseudoInput" placeholder="Ton pseudo" />
+
         <div class="form-group">
           <label for="countrySearch">Choisis ton pays :</label>
           <input type="text" id="countrySearch" placeholder="Recherche ton pays..." autocomplete="off" />
@@ -25,6 +26,7 @@
           <input type="hidden" id="countrySelect" />
           <div id="selectedCountryPreview" class="selected-country"></div>
         </div>
+
         <button id="createRoomBtn">Créer une partie</button>
         <input type="text" id="roomCodeInput" placeholder="Code de la room" />
         <button id="joinRoomBtn">Rejoindre</button>
@@ -49,7 +51,7 @@
           <button id="sendMsgBtn">Envoyer</button>
         </div>
 
-        <!-- Chat privé pour journalistes -->
+        <!-- Chat privé journalistes -->
         <div id="privateChatArea" class="hidden">
           <h4>🔒 Chat secret (journalistes)</h4>
           <div id="privateChatMessages"></div>
@@ -74,15 +76,16 @@
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- 🔧 Bouton d'accès au debug -->
+  <button id="debugAccessBtn" class="hidden" style="position: fixed; bottom: 20px; right: 20px; z-index: 999; background: #444; color: white; padding: 8px 14px; border: none; border-radius: 8px; cursor: pointer;">
+    🛠️ Debug
+  </button>
+
+  <!-- 📦 Scripts JS -->
   <script type="module" src="js/firebase.js"></script>
   <script type="module" src="js/gameEngine.js"></script>
   <script type="module" src="js/allCountries.js"></script>
   <script type="module" src="js/app.js"></script>
- 
-  <button id="debugAccessBtn" class="hidden" style="position: fixed; bottom: 20px; right: 20px; z-index: 999; background: #444; color: white; padding: 8px 14px; border: none; border-radius: 8px; cursor: pointer;">
-  🛠️ Debug
-</button>
-
 </body>
 </html>
+
