@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -14,11 +15,9 @@
     </header>
 
     <main>
-      <!-- Écran d'inscription -->
       <section id="register-screen" class="screen active">
         <h2>🎮 Rejoins une partie</h2>
         <input type="text" id="pseudoInput" placeholder="Ton pseudo" />
-
         <div class="form-group">
           <label for="countrySearch">Choisis ton pays :</label>
           <input type="text" id="countrySearch" placeholder="Recherche ton pays..." autocomplete="off" />
@@ -26,44 +25,41 @@
           <input type="hidden" id="countrySelect" />
           <div id="selectedCountryPreview" class="selected-country"></div>
         </div>
-
         <button id="createRoomBtn">Créer une partie</button>
         <input type="text" id="roomCodeInput" placeholder="Code de la room" />
         <button id="joinRoomBtn">Rejoindre</button>
- 
-
+        <button id="spectatorBtn">+ Spectateur</button>
+        <p id="spectatorCount">Spectateurs : 0</p>
       </section>
 
-      <!-- Écran de jeu -->
       <section id="game-screen" class="screen hidden">
         <h2>🎯 Partie : <span id="roomCodeDisplay"></span></h2>
         <div id="playerList"></div>
         <div id="gameStatus"></div>
 
-        <!-- Zone de vote -->
         <div id="voteArea" class="hidden">
           <h3>🗳️ Votez pour un joueur :</h3>
           <div id="voteOptions"></div>
         </div>
 
-        <!-- Chat global -->
         <div id="chatArea">
           <div id="chatMessages"></div>
           <input type="text" id="chatInput" placeholder="Message..." />
           <button id="sendMsgBtn">Envoyer</button>
         </div>
 
-        <!-- Chat privé journalistes -->
         <div id="privateChatArea" class="hidden">
           <h4>🔒 Chat secret (journalistes)</h4>
           <div id="privateChatMessages"></div>
           <input type="text" id="privateChatInput" placeholder="Message secret..." />
           <button id="sendPrivateMsgBtn">Envoyer au clan</button>
         </div>
+
+        <div id="resultPanel" class="hidden"></div>
+        <button id="restartBtn" class="hidden">🔁 Relancer la partie</button>
       </section>
     </main>
 
-    <!-- Modal Règles -->
     <div id="rulesModal" class="modal hidden">
       <div class="modal-content">
         <h3>📘 Règles du jeu – Le Ballon de Plomb™</h3>
@@ -78,12 +74,11 @@
     </div>
   </div>
 
-  <!-- 🔧 Bouton d'accès au debug -->
   <button id="debugAccessBtn" class="hidden" style="position: fixed; bottom: 20px; right: 20px; z-index: 999; background: #444; color: white; padding: 8px 14px; border: none; border-radius: 8px; cursor: pointer;">
     🛠️ Debug
   </button>
 
-  <!-- 📦 Scripts JS -->
+  <!-- 📦 Scripts -->
   <script type="module" src="js/firebase.js"></script>
   <script type="module" src="js/gameEngine.js"></script>
   <script type="module" src="js/allCountries.js"></script>
