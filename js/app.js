@@ -1,5 +1,5 @@
-import { db, ref, set, push, onValue, update } from "./firebase.js";
-import { assignRoles, lancerTourAuto, afficherResultatFinal } from "./gameEngine.js";
+import { db, ref, set, push, onValue, update, remove } from "./firebase.js";
+import { assignRoles, lancerTourAuto, afficherResultatFinal, resetGameState } from "./gameEngine.js";
 import { allCountries } from "./allCountries.js";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -29,6 +29,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const sendPrivateMsgBtn = document.getElementById("sendPrivateMsgBtn");
   const debugBtn = document.getElementById("debugAccessBtn");
   const logoImg = document.querySelector("header img");
+  const spectatorBtn = document.getElementById("addSpectatorBtn");
+  const spectatorCounter = document.getElementById("spectatorCount");
+  const resultPanel = document.getElementById("resultPanel");
+  const relancerBtn = document.getElementById("relancerBtn");
 
   let pseudo = "";
   let country = "";
@@ -37,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let gameStarted = false;
   let localPlayers = {};
   let myRole = null;
+  let isSpectator = false;
 
   function generateRoomCode() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -91,20 +96,40 @@ document.addEventListener("DOMContentLoaded", () => {
     joinRoom();
   };
 
-  function joinRoom() {
-    gameStarted = false;
-    localPlayers = {};
-    myRole = null;
+  spectatorBtn.onclick = () => {
+    isSpectator = true;
+    roomCode = roomCodeInput.value.trim().toUpperCase();
+    if (!roomCode) return alert("Entre un code de room !");
+    pseudo = "Spectateur_" + Math.floor(Math.random() * 10000);
+    joinRoom(true);
+  };
+
+  relancerBtn.onclick = () => {
+    if (!isCreator) return;
+    resetGameState(roomCode);
+    assignRoles(roomCode, localPlayers);
+    lancerTourAuto(roomCode);
+    voteArea.classList.add("hidden");
+    resultPanel.classList.add("hidden");
+  };
+
+  function joinRoom(asSpectator = false) {
     showScreen("game-screen");
     roomCodeDisplay.textContent = roomCode;
 
-    const playerRef = ref(db, `rooms/${roomCode}/players/${pseudo}`);
-    set(playerRef, { pseudo, country, timestamp: Date.now() });
+    if (!asSpectator) {
+      const playerRef = ref(db, `rooms/${roomCode}/players/${pseudo}`);
+      set(playerRef, { pseudo, country, timestamp: Date.now() });
+    } else {
+      const spectRef = ref(db, `rooms/${roomCode}/spectators/${pseudo}`);
+      set(spectRef, { pseudo, timestamp: Date.now() });
+    }
 
     listenToPlayers();
     listenToChat();
     listenToPrivateChat();
     listenToTour();
+    listenToSpectators();
   }
 
   function listenToPlayers() {
@@ -143,6 +168,14 @@ document.addEventListener("DOMContentLoaded", () => {
     chatInput.value = "";
   };
 
+  sendPrivateMsgBtn.onclick = () => {
+    const msg = privateChatInput.value.trim();
+    if (!msg) return;
+    const msgRef = push(ref(db, `rooms/${roomCode}/privateChat`));
+    set(msgRef, { pseudo, message: msg, timestamp: Date.now() });
+    privateChatInput.value = "";
+  };
+
   function listenToPrivateChat() {
     const roleRef = ref(db, `rooms/${roomCode}/roles/${pseudo}`);
     onValue(roleRef, (snap) => {
@@ -164,14 +197,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  sendPrivateMsgBtn.onclick = () => {
-    const msg = privateChatInput.value.trim();
-    if (!msg) return;
-    const msgRef = push(ref(db, `rooms/${roomCode}/privateChat`));
-    set(msgRef, { pseudo, message: msg, timestamp: Date.now() });
-    privateChatInput.value = "";
-  };
-
   function listenToTour() {
     const tourRef = ref(db, `rooms/${roomCode}/tour`);
     onValue(tourRef, (snapshot) => {
@@ -187,6 +212,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function renderVoteOptions() {
+    if (isSpectator) return;
     voteArea.classList.remove("hidden");
     const joueurs = ["Messi", "Mbappé", "Haaland", "Modric", "Kane", "Griezmann"];
     voteOptions.innerHTML = "";
@@ -194,6 +220,11 @@ document.addEventListener("DOMContentLoaded", () => {
       const btn = document.createElement("button");
       btn.textContent = joueur;
       btn.onclick = () => {
+        const voteRef = ref(db, `rooms/${roomCode}/votes/${pseudo}`);
+        set(voteRef, {
+          joueur,
+          timestamp: Date.now()
+        });
         addChatMessage("Vote", `${pseudo} a voté pour ${joueur}`);
         voteArea.classList.add("hidden");
       };
@@ -208,13 +239,18 @@ document.addEventListener("DOMContentLoaded", () => {
   if (logoImg && debugBtn) {
     logoImg.addEventListener("click", () => {
       logoClickCount++;
-      if (logoClickCount === 3) {
-        debugBtn.classList.remove("hidden");
-      }
+      if (logoClickCount === 3) debugBtn.classList.remove("hidden");
     });
     debugBtn.addEventListener("click", () => {
       window.open("checklist-debug.html", "_blank");
     });
   }
-});
 
+  function listenToSpectators() {
+    const spectRef = ref(db, `rooms/${roomCode}/spectators`);
+    onValue(spectRef, (snapshot) => {
+      const specs = snapshot.val() || {};
+      spectatorCounter.textContent = Object.keys(specs).length;
+    });
+  }
+});
