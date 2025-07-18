@@ -97,6 +97,27 @@ h2, h3, h4 {
   border-radius: 8px;
 }
 
+#timerDisplay {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin: 10px 0;
+  transition: color 0.3s;
+}
+
+#timerDisplay.safe {
+  color: #2ecc71; /* vert */
+}
+
+#timerDisplay.warning {
+  color: #f39c12; /* orange */
+}
+
+#timerDisplay.danger {
+  color: #e74c3c; /* rouge */
+}
+
+
 /* VOTE */
 #voteOptions button {
   margin: 5px;
