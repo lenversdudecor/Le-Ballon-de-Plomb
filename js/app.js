@@ -3,7 +3,6 @@ import { assignRoles, lancerTourAuto, afficherResultatFinal } from "./gameEngine
 import { allCountries } from "./allCountries.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Références DOM
   const registerScreen = document.getElementById("register-screen");
   const gameScreen = document.getElementById("game-screen");
   const pseudoInput = document.getElementById("pseudoInput");
@@ -31,7 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const debugBtn = document.getElementById("debugAccessBtn");
   const logoImg = document.querySelector("header img");
 
-  // Variables
   let pseudo = "";
   let country = "";
   let roomCode = "";
@@ -40,7 +38,6 @@ document.addEventListener("DOMContentLoaded", () => {
   let localPlayers = {};
   let myRole = null;
 
-  // Fonctions de base
   function generateRoomCode() {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     return Array.from({ length: 5 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
@@ -58,13 +55,10 @@ document.addEventListener("DOMContentLoaded", () => {
     chatMessages.scrollTop = chatMessages.scrollHeight;
   }
 
-  // Autocomplete pays
   countrySearch.addEventListener("input", () => {
     const value = countrySearch.value.toLowerCase();
     countryList.innerHTML = "";
-
     if (!value) return;
-
     const matches = allCountries.filter(c => c.name.toLowerCase().includes(value));
     matches.slice(0, 10).forEach(c => {
       const li = document.createElement("li");
@@ -79,7 +73,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Créer une partie
   createRoomBtn.onclick = () => {
     pseudo = pseudoInput.value.trim();
     country = countrySelect.value;
@@ -89,7 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
     joinRoom();
   };
 
-  // Rejoindre une partie
   joinRoomBtn.onclick = () => {
     pseudo = pseudoInput.value.trim();
     country = countrySelect.value;
@@ -103,16 +95,11 @@ document.addEventListener("DOMContentLoaded", () => {
     gameStarted = false;
     localPlayers = {};
     myRole = null;
-
     showScreen("game-screen");
     roomCodeDisplay.textContent = roomCode;
 
     const playerRef = ref(db, `rooms/${roomCode}/players/${pseudo}`);
-    set(playerRef, {
-      pseudo,
-      country,
-      timestamp: Date.now()
-    });
+    set(playerRef, { pseudo, country, timestamp: Date.now() });
 
     listenToPlayers();
     listenToChat();
@@ -125,12 +112,10 @@ document.addEventListener("DOMContentLoaded", () => {
     onValue(playersRef, (snapshot) => {
       const players = snapshot.val() || {};
       localPlayers = players;
-
       playerList.innerHTML = "<h3>👥 Joueurs dans la salle :</h3>";
       Object.entries(players).forEach(([key, p], i) => {
         playerList.innerHTML += `<p>#${i + 1} ${p.country} <strong>${p.pseudo}</strong></p>`;
       });
-
       if (isCreator && !gameStarted && Object.keys(players).length >= 6) {
         gameStarted = true;
         assignRoles(roomCode, players);
@@ -154,11 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const message = chatInput.value.trim();
     if (!message) return;
     const msgRef = push(ref(db, `rooms/${roomCode}/chat`));
-    set(msgRef, {
-      pseudo,
-      message,
-      timestamp: Date.now()
-    });
+    set(msgRef, { pseudo, message, timestamp: Date.now() });
     chatInput.value = "";
   };
 
@@ -168,7 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
       myRole = snap.val();
       if (myRole === "journaliste") {
         privateChatArea.classList.remove("hidden");
-
         const chatRef = ref(db, `rooms/${roomCode}/privateChat`);
         onValue(chatRef, (snapshot) => {
           privateChatMessages.innerHTML = "";
@@ -188,11 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const msg = privateChatInput.value.trim();
     if (!msg) return;
     const msgRef = push(ref(db, `rooms/${roomCode}/privateChat`));
-    set(msgRef, {
-      pseudo,
-      message: msg,
-      timestamp: Date.now()
-    });
+    set(msgRef, { pseudo, message: msg, timestamp: Date.now() });
     privateChatInput.value = "";
   };
 
@@ -206,10 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
         addChatMessage("🧠 Indice", dernier.indice);
         renderVoteOptions();
       }
-
-      if (dernier?.tour > 5) {
-        afficherResultatFinal(roomCode);
-      }
+      if (dernier?.tour > 5) afficherResultatFinal(roomCode);
     });
   }
 
@@ -217,7 +190,6 @@ document.addEventListener("DOMContentLoaded", () => {
     voteArea.classList.remove("hidden");
     const joueurs = ["Messi", "Mbappé", "Haaland", "Modric", "Kane", "Griezmann"];
     voteOptions.innerHTML = "";
-
     joueurs.forEach((joueur) => {
       const btn = document.createElement("button");
       btn.textContent = joueur;
@@ -229,11 +201,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 📘 Règles
   rulesBtn.onclick = () => rulesModal.classList.remove("hidden");
   closeRulesBtn.onclick = () => rulesModal.classList.add("hidden");
 
-  // 🛠️ Debug button déclenché par 3 clics sur le logo
   let logoClickCount = 0;
   if (logoImg && debugBtn) {
     logoImg.addEventListener("click", () => {
@@ -242,9 +212,9 @@ document.addEventListener("DOMContentLoaded", () => {
         debugBtn.classList.remove("hidden");
       }
     });
-
     debugBtn.addEventListener("click", () => {
       window.open("checklist-debug.html", "_blank");
     });
   }
 });
+
