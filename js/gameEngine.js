@@ -1,3 +1,4 @@
+// gameEngine.js
 import { db, ref, set, onValue, remove } from "./firebase.js";
 
 // --- CONFIGURATION ---
@@ -16,14 +17,11 @@ const INDICES = [
   "Quelqu’un essaie de manipuler la discussion..."
 ];
 
-// --- ÉTAT DE LA PARTIE ---
+// --- ÉTAT LOCAL ---
 let currentTour = 1;
-let roles = {};
-let joueurCible = "";
-let joueurLeurre = "";
 let timer = null;
 
-// --- 🔁 Utilitaire de mélange
+// --- 🔁 Mélange
 function shuffle(array) {
   let a = array.slice();
   for (let i = a.length - 1; i > 0; i--) {
@@ -42,19 +40,20 @@ export function assignRoles(roomCode, joueurs) {
   const supporters = tous.slice(nbJournalistes);
 
   tous.forEach((pseudo) => {
-    roles[pseudo] = journalistes.includes(pseudo) ? "journaliste" : "supporter";
-    set(ref(db, `rooms/${roomCode}/roles/${pseudo}`), roles[pseudo]);
+    const role = journalistes.includes(pseudo) ? "journaliste" : "supporter";
+    set(ref(db, `rooms/${roomCode}/roles/${pseudo}`), role);
   });
 
   const candidats = ["Messi", "Mbappé", "Modric", "Haaland", "Kane", "Griezmann"];
-  joueurCible = candidats[Math.floor(Math.random() * candidats.length)];
+  let vrai = candidats[Math.floor(Math.random() * candidats.length)];
+  let leurre;
   do {
-    joueurLeurre = candidats[Math.floor(Math.random() * candidats.length)];
-  } while (joueurLeurre === joueurCible);
+    leurre = candidats[Math.floor(Math.random() * candidats.length)];
+  } while (leurre === vrai);
 
   set(ref(db, `rooms/${roomCode}/objectif`), {
-    vrai: joueurCible,
-    leurre: joueurLeurre,
+    vrai,
+    leurre,
     tourActuel: 1
   });
 }
@@ -81,11 +80,11 @@ export function lancerTourAuto(roomCode) {
     currentTour++;
   };
 
-  lancerUnTour();
+  lancerUnTour(); // premier tour immédiat
   timer = setInterval(lancerUnTour, TEMPS_PAR_TOUR * 1000);
 }
 
-// --- 🧹 Reset d'une partie (sans recharger la page)
+// --- 🧹 Reset d'une partie
 export function resetGameState(roomCode) {
   const baseRef = ref(db, `rooms/${roomCode}`);
   remove(ref(baseRef, "votes"));
@@ -96,7 +95,7 @@ export function resetGameState(roomCode) {
   set(ref(baseRef, "chat"), {});
 }
 
-// --- 🎬 Affichage final dans #resultPanel
+// --- 🎬 Affichage final
 export function afficherResultatFinal(roomCode) {
   const rolesRef = ref(db, `rooms/${roomCode}/roles`);
   const objectifRef = ref(db, `rooms/${roomCode}/objectif`);
@@ -144,5 +143,6 @@ export function afficherResultatFinal(roomCode) {
     });
   });
 }
+
 
 
