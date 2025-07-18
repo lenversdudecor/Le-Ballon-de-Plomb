@@ -1,5 +1,4 @@
-// js/gameEngine.js
-import { db, ref, set, onValue } from "./firebase.js";
+import { db, ref, set, onValue, remove } from "./firebase.js";
 
 // --- CONFIGURATION ---
 const TOURS_TOTAL = 5;
@@ -19,9 +18,9 @@ const INDICES = [
 
 // --- ÉTAT DE LA PARTIE ---
 let currentTour = 1;
-let roles = {}; // {pseudo: "supporter" ou "journaliste"}
-let joueurCible = ""; // Ballon d'Or (objectif des supporters)
-let joueurLeurre = ""; // Leurre (objectif des journalistes)
+let roles = {};
+let joueurCible = "";
+let joueurLeurre = "";
 let timer = null;
 
 // --- 🔁 Utilitaire de mélange
@@ -34,7 +33,7 @@ function shuffle(array) {
   return a;
 }
 
-// --- 🎭 Attribution des rôles (à lancer par le créateur)
+// --- 🎭 Attribution des rôles
 export function assignRoles(roomCode, joueurs) {
   const total = Object.keys(joueurs).length;
   const nbJournalistes = Math.floor(total / 2);
@@ -47,7 +46,6 @@ export function assignRoles(roomCode, joueurs) {
     set(ref(db, `rooms/${roomCode}/roles/${pseudo}`), roles[pseudo]);
   });
 
-  // Sélection des objectifs
   const candidats = ["Messi", "Mbappé", "Modric", "Haaland", "Kane", "Griezmann"];
   joueurCible = candidats[Math.floor(Math.random() * candidats.length)];
   do {
@@ -61,7 +59,7 @@ export function assignRoles(roomCode, joueurs) {
   });
 }
 
-// --- 🧠 Lancer automatiquement tous les tours
+// --- 🔁 Lancer les tours automatiquement
 export function lancerTourAuto(roomCode) {
   currentTour = 1;
 
@@ -83,15 +81,27 @@ export function lancerTourAuto(roomCode) {
     currentTour++;
   };
 
-  lancerUnTour(); // Démarre immédiatement
+  lancerUnTour();
   timer = setInterval(lancerUnTour, TEMPS_PAR_TOUR * 1000);
 }
 
-// --- 🎬 Révélation finale
+// --- 🧹 Reset d'une partie (sans recharger la page)
+export function resetGameState(roomCode) {
+  const baseRef = ref(db, `rooms/${roomCode}`);
+  remove(ref(baseRef, "votes"));
+  remove(ref(baseRef, "tour"));
+  remove(ref(baseRef, "objectif"));
+  remove(ref(baseRef, "roles"));
+  remove(ref(baseRef, "privateChat"));
+  set(ref(baseRef, "chat"), {});
+}
+
+// --- 🎬 Affichage final dans #resultPanel
 export function afficherResultatFinal(roomCode) {
   const rolesRef = ref(db, `rooms/${roomCode}/roles`);
   const objectifRef = ref(db, `rooms/${roomCode}/objectif`);
   const playersRef = ref(db, `rooms/${roomCode}/players`);
+  const voteRef = ref(db, `rooms/${roomCode}/votes`);
 
   onValue(rolesRef, (snapRoles) => {
     const allRoles = snapRoles.val() || {};
@@ -104,18 +114,35 @@ export function afficherResultatFinal(roomCode) {
       onValue(playersRef, (snapPlayers) => {
         const players = snapPlayers.val() || {};
 
-        let message = "🎭 Fin du jeu !\n\n";
-        message += `🎯 Objectif Supporters : élire ${vrai}\n`;
-        message += `🕵️‍♂️ Objectif Journalistes : élire ${leurre}\n\n`;
+        onValue(voteRef, (snapVotes) => {
+          const allVotes = snapVotes.val() || {};
 
-        Object.entries(allRoles).forEach(([pseudo, role]) => {
-          const country = players[pseudo]?.country || "";
-          message += `${country} ${pseudo} ➜ ${role.toUpperCase()}\n`;
+          const scores = {};
+          Object.values(allVotes).forEach(v => {
+            scores[v.joueur] = (scores[v.joueur] || 0) + 1;
+          });
+
+          const resultPanel = document.getElementById("resultPanel");
+          if (!resultPanel) return;
+
+          resultPanel.innerHTML = `
+            <h3>🎭 Résultat final</h3>
+            <p><strong>🎯 Objectif Supporters :</strong> ${vrai}</p>
+            <p><strong>🕵️‍♂️ Objectif Journalistes :</strong> ${leurre}</p>
+            <h4>🎤 Votes :</h4>
+            <ul>${Object.entries(scores).map(([j, s]) => `<li>${j} : ${s} vote(s)</li>`).join("")}</ul>
+            <h4>👥 Rôles :</h4>
+            <ul>${Object.entries(allRoles).map(([p, r]) => {
+              const flag = players[p]?.country || "";
+              return `<li>${flag} <strong>${p}</strong> ➜ ${r.toUpperCase()}</li>`;
+            }).join("")}</ul>
+          `;
+
+          resultPanel.classList.remove("hidden");
         });
-
-        alert(message);
       });
     });
   });
 }
+
 
