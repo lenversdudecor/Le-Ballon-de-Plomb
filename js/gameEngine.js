@@ -76,7 +76,7 @@ export function lancerTourAuto(roomCode) {
       timestamp: Date.now()
     });
 
-    // 🧠 Message de début
+    // Annonce dans le chat
     const chatRef = push(ref(db, `rooms/${roomCode}/chat`));
     set(chatRef, {
       pseudo: "🧠 Système",
@@ -84,27 +84,43 @@ export function lancerTourAuto(roomCode) {
       timestamp: Date.now()
     });
 
-    // 🕒 Compte à rebours
     let timeLeft = TEMPS_PAR_TOUR;
+    const timerDiv = document.getElementById("timerDisplay");
+
     const intervalId = setInterval(() => {
-      const timerDiv = document.getElementById("timerDisplay");
       if (!timerDiv) return;
 
-      timerDiv.textContent = `⏳ Temps restant : ${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`;
+      // Format MM:SS
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = (timeLeft % 60).toString().padStart(2, '0');
+      timerDiv.textContent = `⏳ Temps restant : ${minutes}:${seconds}`;
+
+      // Mise à jour des couleurs
+      timerDiv.className = "";
+      if (timeLeft > 120) timerDiv.classList.add("safe");
+      else if (timeLeft > 30) timerDiv.classList.add("warning");
+      else timerDiv.classList.add("danger");
 
       if (timeLeft <= 0) {
         clearInterval(intervalId);
+        timerDiv.textContent = "";
 
-        // ⌛ Message de fin
+        // Bip sonore
+        const beep = document.getElementById("endBeep");
+        if (beep) beep.play().catch(() => {});
+
+        // Vibration mobile
+        if ("vibrate" in navigator) {
+          navigator.vibrate(400);
+        }
+
+        // Message de fin
         const endRef = push(ref(db, `rooms/${roomCode}/chat`));
         set(endRef, {
           pseudo: "⌛ Système",
-          message: `Le tour ${currentTour} est terminé. Préparez-vous pour l'indice suivant...`,
+          message: `Tour ${currentTour} terminé ! Préparez-vous...`,
           timestamp: Date.now()
         });
-
-        const timerEl = document.getElementById("timerDisplay");
-        if (timerEl) timerEl.textContent = "";
       }
 
       timeLeft--;
