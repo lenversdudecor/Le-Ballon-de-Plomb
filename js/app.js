@@ -235,4 +235,21 @@ function renderVoteOptions() {
     voteOptions.appendChild(btn);
   });
 }
+let logoClickCount = 0;
+const logoImg = document.querySelector("header img");
+const debugBtn = document.getElementById("debugAccessBtn");
+
+if (logoImg && debugBtn) {
+  logoImg.addEventListener("click", () => {
+    logoClickCount++;
+    if (logoClickCount === 3) {
+      debugBtn.classList.remove("hidden");
+    }
+  });
+
+  debugBtn.addEventListener("click", () => {
+    window.open("checklist-debug.html", "_blank");
+  });
+}
+
 });
