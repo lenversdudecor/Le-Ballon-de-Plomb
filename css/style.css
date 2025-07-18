@@ -40,18 +40,31 @@ button {
   border-radius: 8px;
   cursor: pointer;
   margin-top: 10px;
+  transition: background 0.2s ease;
 }
 
 button:hover {
   background: #005f7a;
 }
 
+button:focus,
+input:focus {
+  outline: 2px solid #007BFF;
+  outline-offset: 2px;
+}
+
+/* INPUTS */
 input[type="text"] {
   padding: 10px;
   margin: 10px 0;
   width: 100%;
   border-radius: 6px;
   border: 1px solid #ccc;
+}
+
+/* FORM GROUP */
+.form-group input[type="text"] {
+  margin-bottom: 6px;
 }
 
 /* SECTION STYLING */
@@ -112,9 +125,14 @@ h2, h3, h4 {
 }
 
 .selected-country {
-  margin-top: 5px;
-  font-weight: bold;
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: #e6f7ff;
+  border: 1px solid #91d5ff;
+  border-radius: 6px;
   color: #333;
+  display: inline-block;
+  font-weight: bold;
 }
 
 /* MODAL */
@@ -138,10 +156,35 @@ h2, h3, h4 {
   max-width: 500px;
   width: 90%;
   text-align: center;
+  animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
 }
 
 .modal.hidden {
   display: none;
+}
+
+/* DEBUG BUTTON */
+#debugAccessBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
+  background: #444;
+  color: white;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* HIDDEN CLASS */
+.hidden {
+  display: none !important;
 }
 
 /* MOBILE */
@@ -160,5 +203,6 @@ h2, h3, h4 {
     padding: 20px;
   }
 }
+
 
 
