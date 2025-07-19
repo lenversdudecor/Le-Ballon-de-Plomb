@@ -198,5 +198,9 @@ export function resetGameState(roomCode) {
   set(ref(baseRef, "chat"), {});
 }
 
+// ✅ Export de la liste des joueurs avec pays et clubs
+export function getAllPlayersList() {
+  return JOUEURS_BALLON_OR;
+}
 
 
