@@ -1,10 +1,10 @@
-// gameEngine.js
 import { db, ref, set, onValue, remove } from "./firebase.js";
 
-// --- CONFIGURATION ---
+// --- CONFIG ---
 const TOURS_TOTAL = 5;
-const TEMPS_PAR_TOUR = 240; // secondes
- const INDICES = [
+const TEMPS_PAR_TOUR = 240; // ⏱️ 4 minutes (en secondes)
+
+const INDICES = [
   "Le joueur #2 aime la presse écrite...",
   "Le joueur #4 suit beaucoup les conférences...",
   "Le joueur #7 a voté très tôt au dernier tour...",
@@ -15,50 +15,84 @@ const TEMPS_PAR_TOUR = 240; // secondes
   "Les journalistes semblent voter groupés...",
   "Un supporter a défendu le mauvais joueur...",
   "Quelqu’un essaie de manipuler la discussion...",
-  "Un joueur a utilisé beaucoup d'émojis dans ses messages...",
-  "Le joueur #1 semble très sûr de lui...",
-  "Un journaliste tente de détourner le débat...",
-  "Le joueur #3 a été silencieux pendant tout le tour...",
-  "Le joueur avec le drapeau 🇫🇷 a été très actif...",
-  "Quelqu’un copie souvent les arguments des autres...",
-  "Le joueur #6 a changé de ton brusquement...",
-  "Certains messages semblent trop bien construits pour être honnêtes...",
-  "Un joueur utilise toujours les mêmes expressions...",
-  "Le pseudo le plus long cache peut-être un manipulateur...",
-  "Un joueur pose beaucoup de questions mais ne vote jamais clair...",
-  "Le joueur qui a démarré la conversation pourrait avoir un rôle important...",
-  "Un joueur essaie de désigner un coupable trop tôt...",
-  "Un joueur utilise souvent le mot 'objectivement'...",
-  "Le joueur #5 réagit toujours aux votes, jamais avant...",
-  "Le joueur #2 a pris la défense d’un journaliste sans raison claire...",
-  "Les votes du dernier tour étaient étrangement alignés...",
-  "Un joueur essaie de créer une confusion volontaire...",
-  "Un joueur utilise des majuscules de façon excessive...",
-  "Le joueur #4 change souvent de sujet...",
-  "Le joueur #3 ne s’est jamais exprimé sur l’objectif du tour...",
-  "Certains joueurs parlent beaucoup pour dire peu...",
-  "Le pseudo en majuscules attire les soupçons...",
-  "Un joueur semble recopier les idées d’un autre à chaque tour...",
-  "Le joueur #6 suit la majorité, mais ne prend jamais d’initiative...",
-  "Un joueur a voté pour un candidat très peu cité...",
-  "Le joueur #7 a toujours voté dans les premières secondes...",
-  "Le drapeau choisi par un joueur semble peu cohérent avec son pseudo...",
-  "Le joueur le plus bavard n’est pas forcément celui qui dit la vérité...",
-  "Un joueur a modifié complètement son comportement depuis le premier tour..."
+  "Le joueur #3 a reçu beaucoup de votes suspects...",
+  "Le joueur qui plaisante souvent semble cacher quelque chose...",
+  "Un pseudo contenant des chiffres attire l'attention...",
+  "Certains joueurs restent silencieux pendant les débats...",
+  "Le joueur qui écrit en majuscules est suspecté...",
+  "Un journaliste a félicité un autre sans raison...",
+  "Le joueur #1 a changé d'avis en dernière minute...",
+  "Des messages privés ont fuité depuis le clan journaliste...",
+  "Un joueur semble suivre une stratégie bien rodée...",
+  "Le joueur #5 a accusé sans preuve...",
+  "Un supporter doute de ses propres choix...",
+  "Le joueur qui tape lentement suscite des doutes...",
+  "Certains votent toujours en dernier...",
+  "Un journaliste a fait l’éloge d’un mauvais choix...",
+  "Le joueur #6 est resté muet tout le tour...",
+  "Un joueur a essayé de détourner la conversation...",
+  "Un pseudo avec un emoji soulève des soupçons...",
+  "Un journaliste tente de semer la confusion...",
+  "Un joueur a sauté son tour précédent...",
+  "Le joueur qui demande les règles semble suspect..."
 ];
 
-// --- ÉTAT LOCAL ---
-let currentTour = 1;
-let timer = null;
+// --- Base de 50 joueurs (nom, drapeau, club)
+const JOUEURS_BALLO = [
+  { nom: "Lionel Messi", pays: "🇦🇷", club: "Inter Miami" },
+  { nom: "Kylian Mbappé", pays: "🇫🇷", club: "Real Madrid" },
+  { nom: "Erling Haaland", pays: "🇳🇴", club: "Man City" },
+  { nom: "Kevin De Bruyne", pays: "🇧🇪", club: "Man City" },
+  { nom: "Cristiano Ronaldo", pays: "🇵🇹", club: "Al Nassr" },
+  { nom: "Karim Benzema", pays: "🇫🇷", club: "Al-Ittihad" },
+  { nom: "Luka Modric", pays: "🇭🇷", club: "Real Madrid" },
+  { nom: "Jude Bellingham", pays: "🇬🇧", club: "Real Madrid" },
+  { nom: "Vinícius Jr.", pays: "🇧🇷", club: "Real Madrid" },
+  { nom: "Mohamed Salah", pays: "🇪🇬", club: "Liverpool" },
+  { nom: "Antoine Griezmann", pays: "🇫🇷", club: "Atlético" },
+  { nom: "Harry Kane", pays: "🇬🇧", club: "Bayern Munich" },
+  { nom: "Robert Lewandowski", pays: "🇵🇱", club: "Barcelona" },
+  { nom: "Neymar Jr.", pays: "🇧🇷", club: "Al-Hilal" },
+  { nom: "Bukayo Saka", pays: "🇬🇧", club: "Arsenal" },
+  { nom: "Jamal Musiala", pays: "🇩🇪", club: "Bayern Munich" },
+  { nom: "Pedri", pays: "🇪🇸", club: "Barcelona" },
+  { nom: "Gavi", pays: "🇪🇸", club: "Barcelona" },
+  { nom: "Rafael Leão", pays: "🇵🇹", club: "AC Milan" },
+  { nom: "Lautaro Martínez", pays: "🇦🇷", club: "Inter Milan" },
+  { nom: "João Félix", pays: "🇵🇹", club: "Barcelona" },
+  { nom: "Ousmane Dembélé", pays: "🇫🇷", club: "PSG" },
+  { nom: "Riyad Mahrez", pays: "🇩🇿", club: "Al-Ahli" },
+  { nom: "Bruno Fernandes", pays: "🇵🇹", club: "Man United" },
+  { nom: "Marcus Rashford", pays: "🇬🇧", club: "Man United" },
+  { nom: "Leroy Sané", pays: "🇩🇪", club: "Bayern Munich" },
+  { nom: "Trent A. Arnold", pays: "🇬🇧", club: "Liverpool" },
+  { nom: "Alphonso Davies", pays: "🇨🇦", club: "Bayern Munich" },
+  { nom: "Declan Rice", pays: "🇬🇧", club: "Arsenal" },
+  { nom: "Khvicha Kvaratskhelia", pays: "🇬🇪", club: "Napoli" },
+  { nom: "Victor Osimhen", pays: "🇳🇬", club: "Napoli" },
+  { nom: "Federico Valverde", pays: "🇺🇾", club: "Real Madrid" },
+  { nom: "Eduardo Camavinga", pays: "🇫🇷", club: "Real Madrid" },
+  { nom: "Rodrygo", pays: "🇧🇷", club: "Real Madrid" },
+  { nom: "Enzo Fernández", pays: "🇦🇷", club: "Chelsea" },
+  { nom: "Jorginho", pays: "🇮🇹", club: "Arsenal" },
+  { nom: "Theo Hernandez", pays: "🇫🇷", club: "AC Milan" },
+  { nom: "Achraf Hakimi", pays: "🇲🇦", club: "PSG" },
+  { nom: "Marquinhos", pays: "🇧🇷", club: "PSG" },
+  { nom: "André Onana", pays: "🇨🇲", club: "Man United" },
+  { nom: "Diogo Costa", pays: "🇵🇹", club: "Porto" },
+  { nom: "Mike Maignan", pays: "🇫🇷", club: "AC Milan" },
+  { nom: "Emiliano Martínez", pays: "🇦🇷", club: "Aston Villa" },
+  { nom: "David Alaba", pays: "🇦🇹", club: "Real Madrid" },
+  { nom: "Raphaël Varane", pays: "🇫🇷", club: "Man United" },
+  { nom: "Ilkay Gündogan", pays: "🇩🇪", club: "Barcelona" },
+  { nom: "Martin Ødegaard", pays: "🇳🇴", club: "Arsenal" },
+  { nom: "N'Golo Kanté", pays: "🇫🇷", club: "Al-Ittihad" },
+  { nom: "Sergio Busquets", pays: "🇪🇸", club: "Inter Miami" }
+];
 
-// --- 🔁 Mélange
+// --- SHUFFLE ---
 function shuffle(array) {
-  let a = array.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
+  return array.slice().sort(() => Math.random() - 0.5);
 }
 
 // --- 🎭 Attribution des rôles
@@ -67,115 +101,47 @@ export function assignRoles(roomCode, joueurs) {
   const nbJournalistes = Math.floor(total / 2);
   const tous = shuffle(Object.keys(joueurs));
   const journalistes = tous.slice(0, nbJournalistes);
-  const supporters = tous.slice(nbJournalistes);
 
   tous.forEach((pseudo) => {
     const role = journalistes.includes(pseudo) ? "journaliste" : "supporter";
     set(ref(db, `rooms/${roomCode}/roles/${pseudo}`), role);
   });
 
-  const candidats = ["Messi", "Mbappé", "Modric", "Haaland", "Kane", "Griezmann"];
-  let vrai = candidats[Math.floor(Math.random() * candidats.length)];
+  // 🎯 Tirage aléatoire de 6 candidats
+  const candidats = shuffle(JOUEURS_BALLO).slice(0, 6);
+  const vrai = candidats[Math.floor(Math.random() * 6)].nom;
   let leurre;
   do {
-    leurre = candidats[Math.floor(Math.random() * candidats.length)];
+    leurre = candidats[Math.floor(Math.random() * 6)].nom;
   } while (leurre === vrai);
 
-  set(ref(db, `rooms/${roomCode}/objectif`), {
-    vrai,
-    leurre,
-    tourActuel: 1
-  });
+  set(ref(db, `rooms/${roomCode}/objectif`), { vrai, leurre, candidats });
 }
 
-// --- 🔁 Lancer les tours automatiquement
+// --- Tour Auto
+let currentTour = 1;
+let timer;
 export function lancerTourAuto(roomCode) {
   currentTour = 1;
-
   const lancerUnTour = () => {
     if (currentTour > TOURS_TOTAL) {
       clearInterval(timer);
       afficherResultatFinal(roomCode);
       return;
     }
-
     const indice = INDICES[Math.floor(Math.random() * INDICES.length)];
     set(ref(db, `rooms/${roomCode}/tour/${currentTour}`), {
-      indice,
       tour: currentTour,
+      indice,
       timestamp: Date.now()
     });
-
-    // Annonce dans le chat
-    const chatRef = push(ref(db, `rooms/${roomCode}/chat`));
-    set(chatRef, {
-      pseudo: "🧠 Système",
-      message: `Indice du tour ${currentTour} : ${indice}`,
-      timestamp: Date.now()
-    });
-
-    let timeLeft = TEMPS_PAR_TOUR;
-    const timerDiv = document.getElementById("timerDisplay");
-
-    const intervalId = setInterval(() => {
-      if (!timerDiv) return;
-
-      // Format MM:SS
-      const minutes = Math.floor(timeLeft / 60);
-      const seconds = (timeLeft % 60).toString().padStart(2, '0');
-      timerDiv.textContent = `⏳ Temps restant : ${minutes}:${seconds}`;
-
-      // Mise à jour des couleurs
-      timerDiv.className = "";
-      if (timeLeft > 120) timerDiv.classList.add("safe");
-      else if (timeLeft > 30) timerDiv.classList.add("warning");
-      else timerDiv.classList.add("danger");
-
-      if (timeLeft <= 0) {
-        clearInterval(intervalId);
-        timerDiv.textContent = "";
-
-        // Bip sonore
-        const beep = document.getElementById("endBeep");
-        if (beep) beep.play().catch(() => {});
-
-        // Vibration mobile
-        if ("vibrate" in navigator) {
-          navigator.vibrate(400);
-        }
-
-        // Message de fin
-        const endRef = push(ref(db, `rooms/${roomCode}/chat`));
-        set(endRef, {
-          pseudo: "⌛ Système",
-          message: `Tour ${currentTour} terminé ! Préparez-vous...`,
-          timestamp: Date.now()
-        });
-      }
-
-      timeLeft--;
-    }, 1000);
-
-    console.log(`🧠 Tour ${currentTour} lancé avec indice : ${indice}`);
     currentTour++;
   };
-
   lancerUnTour();
   timer = setInterval(lancerUnTour, TEMPS_PAR_TOUR * 1000);
 }
 
-// --- 🧹 Reset d'une partie
-export function resetGameState(roomCode) {
-  const baseRef = ref(db, `rooms/${roomCode}`);
-  remove(ref(baseRef, "votes"));
-  remove(ref(baseRef, "tour"));
-  remove(ref(baseRef, "objectif"));
-  remove(ref(baseRef, "roles"));
-  remove(ref(baseRef, "privateChat"));
-  set(ref(baseRef, "chat"), {});
-}
-
-// --- 🎬 Affichage final
+// --- Résultat final
 export function afficherResultatFinal(roomCode) {
   const rolesRef = ref(db, `rooms/${roomCode}/roles`);
   const objectifRef = ref(db, `rooms/${roomCode}/objectif`);
@@ -184,18 +150,15 @@ export function afficherResultatFinal(roomCode) {
 
   onValue(rolesRef, (snapRoles) => {
     const allRoles = snapRoles.val() || {};
-
     onValue(objectifRef, (snapObj) => {
       const obj = snapObj.val();
       const vrai = obj?.vrai;
       const leurre = obj?.leurre;
-
+      const candidats = obj?.candidats || [];
       onValue(playersRef, (snapPlayers) => {
         const players = snapPlayers.val() || {};
-
         onValue(voteRef, (snapVotes) => {
           const allVotes = snapVotes.val() || {};
-
           const scores = {};
           Object.values(allVotes).forEach(v => {
             scores[v.joueur] = (scores[v.joueur] || 0) + 1;
@@ -222,6 +185,17 @@ export function afficherResultatFinal(roomCode) {
       });
     });
   });
+}
+
+// --- Reset
+export function resetGameState(roomCode) {
+  const baseRef = ref(db, `rooms/${roomCode}`);
+  remove(ref(baseRef, "votes"));
+  remove(ref(baseRef, "tour"));
+  remove(ref(baseRef, "objectif"));
+  remove(ref(baseRef, "roles"));
+  remove(ref(baseRef, "privateChat"));
+  set(ref(baseRef, "chat"), {});
 }
 
 
