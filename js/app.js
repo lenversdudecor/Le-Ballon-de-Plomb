@@ -1,39 +1,32 @@
 import { db, ref, set, push, onValue } from "./firebase.js";
-import { assignRoles, lancerTourAuto, afficherResultatFinal, resetGameState } from "./gameEngine.js";
+import { assignRoles, lancerTourAuto, afficherResultatFinal, resetGameState, getAllPlayersList } from "./gameEngine.js";
 import { allCountries } from "./allCountries.js";
 
 document.addEventListener("DOMContentLoaded", () => {
-  // RÉFÉRENCES DOM
+  // --- Sélecteurs DOM
   const pseudoInput = document.getElementById("pseudoInput");
   const countrySearch = document.getElementById("countrySearch");
   const countryList = document.getElementById("countryList");
   const countrySelect = document.getElementById("countrySelect");
   const countryPreview = document.getElementById("selectedCountryPreview");
-
   const createRoomBtn = document.getElementById("createRoomBtn");
   const joinRoomBtn = document.getElementById("joinRoomBtn");
-  const spectatorBtn = document.getElementById("spectatorBtn");
-
   const roomCodeInput = document.getElementById("roomCodeInput");
+  const spectatorBtn = document.getElementById("spectatorBtn");
+  const spectatorCounter = document.getElementById("spectatorCount");
   const roomCodeDisplay = document.getElementById("roomCodeDisplay");
-
   const playerList = document.getElementById("playerList");
   const chatMessages = document.getElementById("chatMessages");
   const chatInput = document.getElementById("chatInput");
   const sendMsgBtn = document.getElementById("sendMsgBtn");
-
   const voteArea = document.getElementById("voteArea");
   const voteOptions = document.getElementById("voteOptions");
-
-  const spectatorCounter = document.getElementById("spectatorCount");
   const resultPanel = document.getElementById("resultPanel");
-
   const relancerBtn = document.getElementById("relancerBtn");
   const rulesBtn = document.getElementById("rulesBtn");
   const rulesModal = document.getElementById("rulesModal");
   const closeRulesBtn = document.getElementById("closeRulesBtn");
 
-  // VARIABLES JEU
   let pseudo = "";
   let country = "";
   let roomCode = "";
@@ -42,17 +35,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let gameStarted = false;
   let localPlayers = {};
 
-  // UTILITAIRE
+  // --- Génère un code de room
   function generateRoomCode() {
     return Math.random().toString(36).substring(2, 7).toUpperCase();
   }
 
+  // --- Changement d'écran
   function showScreen(id) {
     document.querySelectorAll(".screen").forEach(s => s.classList.add("hidden"));
     document.getElementById(id).classList.remove("hidden");
   }
 
-  // AUTOCOMPLETE PAYS
+  // --- Autocomplete pays
   countrySearch.addEventListener("input", () => {
     const value = countrySearch.value.toLowerCase();
     countryList.innerHTML = "";
@@ -71,50 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // CRÉER UNE PARTIE
-  createRoomBtn.onclick = () => {
-    pseudo = pseudoInput.value.trim();
-    country = countrySelect.value;
-    if (!pseudo || !country) return alert("Remplis ton pseudo et choisis un pays !");
-    roomCode = generateRoomCode();
-    isCreator = true;
-    joinRoom();
-  };
-
-  // REJOINDRE UNE PARTIE
-  joinRoomBtn.onclick = () => {
-    pseudo = pseudoInput.value.trim();
-    country = countrySelect.value;
-    roomCode = roomCodeInput.value.trim().toUpperCase();
-    if (!pseudo || !country || !roomCode) return alert("Champs requis !");
-    joinRoom();
-  };
-
-  // SPECTATEUR
-  spectatorBtn.onclick = () => {
-    roomCode = roomCodeInput.value.trim().toUpperCase();
-    if (!roomCode) return alert("Code requis pour spectateur !");
-    pseudo = "Spectateur" + Math.floor(Math.random() * 1000);
-    isSpectator = true;
-    joinRoom(true);
-  };
-
-  // CHAT
-  sendMsgBtn.onclick = () => {
-    const msg = chatInput.value.trim();
-    if (!msg) return;
-    const msgRef = push(ref(db, `rooms/${roomCode}/chat`));
-    set(msgRef, { pseudo, message: msg });
-    chatInput.value = "";
-  };
-
-  // BOUTONS RÈGLES
-  if (rulesBtn && rulesModal && closeRulesBtn) {
-    rulesBtn.onclick = () => rulesModal.classList.remove("hidden");
-    closeRulesBtn.onclick = () => rulesModal.classList.add("hidden");
-  }
-
-  // REJOINDRE UNE ROOM
+  // --- Rejoindre une room
   function joinRoom(asSpectator = false) {
     showScreen("game-screen");
     roomCodeDisplay.textContent = roomCode;
@@ -133,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
     listenToVotes();
   }
 
-  // LISTENERS
+  // --- Listeners
   function listenToPlayers() {
     const playersRef = ref(db, `rooms/${roomCode}/players`);
     onValue(playersRef, snap => {
@@ -181,33 +132,64 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // VOTE
+  // --- Actions
+  createRoomBtn.onclick = () => {
+    pseudo = pseudoInput.value.trim();
+    country = countrySelect.value;
+    if (!pseudo || !country) return alert("Remplis ton pseudo + pays");
+    roomCode = generateRoomCode();
+    isCreator = true;
+    joinRoom();
+  };
+
+  joinRoomBtn.onclick = () => {
+    pseudo = pseudoInput.value.trim();
+    country = countrySelect.value;
+    roomCode = roomCodeInput.value.trim().toUpperCase();
+    if (!pseudo || !country || !roomCode) return alert("Champs requis !");
+    joinRoom();
+  };
+
+  spectatorBtn.onclick = () => {
+    roomCode = roomCodeInput.value.trim().toUpperCase();
+    if (!roomCode) return alert("Code requis pour spectateur !");
+    pseudo = "Spectateur" + Math.floor(Math.random() * 1000);
+    isSpectator = true;
+    joinRoom(true);
+  };
+
+  sendMsgBtn.onclick = () => {
+    const msg = chatInput.value.trim();
+    if (!msg) return;
+    const msgRef = push(ref(db, `rooms/${roomCode}/chat`));
+    set(msgRef, { pseudo, message: msg });
+    chatInput.value = "";
+  };
+
+  relancerBtn.onclick = () => {
+    resetGameState(roomCode);
+    assignRoles(roomCode, localPlayers);
+    lancerTourAuto(roomCode);
+    resultPanel.classList.add("hidden");
+    voteArea.classList.add("hidden");
+  };
+
+  rulesBtn.onclick = () => rulesModal.classList.remove("hidden");
+  closeRulesBtn.onclick = () => rulesModal.classList.add("hidden");
+
   function renderVoteOptions() {
     voteOptions.innerHTML = "";
-    const joueurs = ["Messi", "Mbappé", "Haaland", "Kane", "Griezmann", "Modric"];
-    joueurs.forEach(nom => {
+    const joueurs = getAllPlayersList(); // depuis gameEngine.js
+    joueurs.forEach(({ name }) => {
       const btn = document.createElement("button");
-      btn.textContent = nom;
+      btn.textContent = name;
       btn.onclick = () => {
         const voteRef = ref(db, `rooms/${roomCode}/votes/${pseudo}`);
-        set(voteRef, { joueur: nom });
+        set(voteRef, { joueur: name });
         voteArea.classList.add("hidden");
       };
       voteOptions.appendChild(btn);
     });
   }
-
-  // RELANCER LA PARTIE
-  if (relancerBtn) {
-    relancerBtn.onclick = () => {
-      if (!isCreator) return;
-      resetGameState(roomCode);
-      assignRoles(roomCode, localPlayers);
-      lancerTourAuto(roomCode);
-      voteArea.classList.add("hidden");
-      resultPanel.classList.add("hidden");
-    };
-  }
 });
-
 
